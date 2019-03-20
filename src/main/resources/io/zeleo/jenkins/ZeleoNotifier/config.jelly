@@ -3,10 +3,4 @@
   <f:entry title="Trigger Zeleo Event When Build Starts">
       <f:checkbox name="onStart" value="true" checked="${instance.onStart}"/>
   </f:entry>
-  <f:entry title="Trigger Zeleo Event If Build Succeeds">
-      <f:checkbox name="onSuccess" value="true" checked="${instance.onSuccess}"/>
-  </f:entry>
-  <f:entry title="Trigger Zeleo Event If Build Fails">
-      <f:checkbox name="onFailure" value="true" checked="${instance.onFailure}"/>
-  </f:entry>
 </j:jelly>

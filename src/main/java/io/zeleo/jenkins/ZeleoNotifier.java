@@ -14,20 +14,19 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
+@SuppressWarnings("rawtypes")
 public class ZeleoNotifier extends Notifier {
 	
 	private boolean onStart;
-	private boolean onSuccess;
-	private boolean onFailure;
 	
 	@DataBoundConstructor
-    public ZeleoNotifier(boolean onStart, boolean onSuccess, boolean onFailure) {
+    public ZeleoNotifier(boolean onStart) {
 		super();
 		this.onStart = onStart;
-		this.onSuccess = onSuccess;
-		this.onFailure = onFailure;
 	}
 
 	@Override

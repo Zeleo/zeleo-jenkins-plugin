@@ -1,18 +1,13 @@
 package io.zeleo.jenkins;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class ZeleoUpdate {
 	private String projectName;
     private String buildName;
     private String buildStatusUrl;
     private String event;
-	
-	public ZeleoUpdate(String projectName, String buildName, String buildStatusUrl, String event) {
-		this.projectName = projectName;
-		this.buildName = buildName;
-		this.buildStatusUrl = buildStatusUrl;
-		this.event = event;
-	}
 }
