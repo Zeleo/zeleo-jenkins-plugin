@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Connect Jenkins with <a href="https://www.zeleo.io" target="_blank">Zeleo</a>
+</div>
