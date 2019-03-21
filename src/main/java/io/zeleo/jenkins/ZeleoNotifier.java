@@ -1,6 +1,7 @@
 package io.zeleo.jenkins;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -15,10 +16,12 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
 @SuppressWarnings("rawtypes")
+@Slf4j
 public class ZeleoNotifier extends Notifier {
 	
 	private boolean onStart;
@@ -27,12 +30,18 @@ public class ZeleoNotifier extends Notifier {
     public ZeleoNotifier(boolean onStart) {
 		super();
 		this.onStart = onStart;
+		log.info("Registering Zeleo Plugin");
 	}
 
 	@Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
+	
+	@Override
+	public boolean needsToRunAfterFinalized() {
+		return true;
+	}
 	
 	@Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {

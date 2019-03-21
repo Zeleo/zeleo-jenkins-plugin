@@ -2,7 +2,6 @@ package io.zeleo.jenkins;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -16,15 +15,18 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import lombok.extern.slf4j.Slf4j;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
+@Extension
 public class BuildListener extends RunListener<AbstractBuild> {
-	private final static Logger LOG = Logger.getLogger(BuildListener.class.getName());
+
 	private final static ObjectMapper mapper;
 	
 	static {
@@ -39,21 +41,27 @@ public class BuildListener extends RunListener<AbstractBuild> {
 	
 	public BuildListener() {
 		super(AbstractBuild.class);
+		log.info("Starting Zeleo Plugin");
 	}
 	
 	@Override
     public void onStarted(AbstractBuild build, TaskListener listener) {
 		ZeleoNotifier notifier = getBuildUpdate(build);
-		LOG.info("Starting Zeleo Plugin");
-		try {
-			log.info(toJSON(build));
-			log.info(toJSON(notifier));
-			LOG.info(toJSON(build));
-			LOG.info(toJSON(notifier));
-		} catch(Exception ex) {
-			log.error(ex.getMessage());
-		}
-		
+		log.info("Zeleo Running at Build Start");
+		log.info("Agent: " + build.getBuiltOnStr());
+		log.info("Description: " + build.getDescription());
+		log.info("Duration: " + build.getDuration());
+		log.info("Estimated Duration: " + build.getEstimatedDuration());
+		log.info("External ID: " + build.getExternalizableId());
+		log.info("Full Display Name: " + build.getFullDisplayName());
+		log.info("Jenkins Version: " + build.getHudsonVersion());
+		log.info("Build ID: " + build.getId());
+		log.info("Search URL: " + build.getSearchUrl());
+		log.info("Start Time: " + build.getStartTimeInMillis());
+		log.info("Timestamp: " + build.getTimestampString());
+		log.info("Log: " + build.getLogText());
+		try {log.info("Summary: " + toJSON(build.getBuildStatusSummary()));} catch(Exception ex) {}
+
 		if(notifier != null && notifier.isOnStart()) {
 			ZeleoUpdate event = new ZeleoUpdate(build.getProject().getDisplayName(), build.getDisplayName(), 
 					build.getBuildStatusUrl(), "START");
@@ -63,18 +71,19 @@ public class BuildListener extends RunListener<AbstractBuild> {
 	
 	@Override
     public void onCompleted(AbstractBuild build, @Nonnull TaskListener listener) {
-		LOG.info("Starting Zeleo Plugin");
+		log.info("Running Zeleo Plugin on Build Complete");
 		ZeleoNotifier notifier = getBuildUpdate(build);
-		if(notifier != null || build == null || build.getResult() == null) {
+		Result result = build.getResult();
+		if(notifier != null && result != null) {
 			ZeleoUpdate event = new ZeleoUpdate(build.getProject().getDisplayName(), build.getDisplayName(), 
-					build.getBuildStatusUrl(), build.getResult().toString());
+					build.getBuildStatusUrl(), 
+					result.toString());
 			fireEvent(event);
 		}
 		
 	}
 	
 	private ZeleoNotifier getBuildUpdate(AbstractBuild build) {
-		LOG.info("Starting Zeleo Plugin");
         for (Object update : build.getProject().getPublishersList().toMap().values()) {
             if (update instanceof ZeleoNotifier) {
                 return (ZeleoNotifier) update;
