@@ -60,7 +60,7 @@ public class BuildListener extends RunListener<AbstractBuild> {
 		log.info("Start Time: " + build.getStartTimeInMillis());
 		log.info("Timestamp: " + build.getTimestampString());
 		log.info("Log: " + build.getLogText());
-		try {log.info("Summary: " + toJSON(build.getBuildStatusSummary()));} catch(Exception ex) {}
+		try {log.info("Summary: " + toJSON(build.getBuildStatusSummary()));} catch(IOException ex) {}
 
 		if(notifier != null && notifier.isOnStart()) {
 			ZeleoUpdate event = new ZeleoUpdate(build.getProject().getDisplayName(), build.getDisplayName(), 
