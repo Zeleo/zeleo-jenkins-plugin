@@ -2,6 +2,7 @@ package io.zeleo.jenkins;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Calendar;
 
 import javax.annotation.Nonnull;
 
@@ -20,7 +21,14 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import io.zeleo.jenkins.connection.SSLManager;
+import io.zeleo.jenkins.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
@@ -28,7 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 public class BuildListener extends RunListener<AbstractBuild> {
 
 	private final static ObjectMapper mapper;
+	private final static String ZELEO_LAMBDA = "https://applications.zeleo.io/applications/jenkins/event";
+	private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 	
+	/**
+	 * Set up the service.
+	 */
 	static {
         mapper = new ObjectMapper().setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -44,45 +57,63 @@ public class BuildListener extends RunListener<AbstractBuild> {
 		log.info("Starting Zeleo Plugin");
 	}
 	
+	/**
+	 * Run on started if configured.
+	 */
 	@Override
     public void onStarted(AbstractBuild build, TaskListener listener) {
 		ZeleoNotifier notifier = getBuildUpdate(build);
+		Calendar startCalendar = Calendar.getInstance();
+		startCalendar.setTimeInMillis(build.getStartTimeInMillis());
+		startCalendar.get(Calendar.DAY_OF_WEEK);
+		startCalendar.get(Calendar.WEEK_OF_MONTH);
+		startCalendar.get(Calendar.DAY_OF_MONTH);
+		startCalendar.get(Calendar.MONTH);
+		startCalendar.get(Calendar.YEAR);
+		startCalendar.get(Calendar.HOUR_OF_DAY);
+		startCalendar.get(Calendar.WEEK_OF_YEAR);
 		log.info("Zeleo Running at Build Start");
-		log.info("Agent: " + build.getBuiltOnStr());
-		log.info("Description: " + build.getDescription());
-		log.info("Duration: " + build.getDuration());
-		log.info("Estimated Duration: " + build.getEstimatedDuration());
-		log.info("External ID: " + build.getExternalizableId());
-		log.info("Full Display Name: " + build.getFullDisplayName());
-		log.info("Jenkins Version: " + build.getHudsonVersion());
-		log.info("Build ID: " + build.getId());
-		log.info("Search URL: " + build.getSearchUrl());
-		log.info("Start Time: " + build.getStartTimeInMillis());
-		log.info("Timestamp: " + build.getTimestampString());
-		log.info("Log: " + build.getLogText());
-		try {log.info("Summary: " + toJSON(build.getBuildStatusSummary()));} catch(IOException ex) {}
-
 		if(notifier != null && notifier.isOnStart()) {
-			ZeleoUpdate event = new ZeleoUpdate(build.getProject().getDisplayName(), build.getDisplayName(), 
-					build.getBuildStatusUrl(), "START");
+			ZeleoUpdate event = new ZeleoUpdate(build.getDescription(), build.getDuration(), build.getEstimatedDuration(), 
+					build.getExternalizableId(), build.getFullDisplayName(), build.getId(), build.getSearchUrl(), 
+					build.getStartTimeInMillis(), build.getTimestampString(), build.getDisplayName(), 
+					build.getBuildStatusUrl(), "START", DateUtils.getDay(startCalendar.get(Calendar.DAY_OF_WEEK)), 
+					startCalendar.get(Calendar.WEEK_OF_MONTH), startCalendar.get(Calendar.DAY_OF_MONTH), 
+					DateUtils.getMonth(startCalendar.get(Calendar.MONTH)), startCalendar.get(Calendar.YEAR), 
+					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR));
 			fireEvent(event);
 		}
 	}
 	
+	/**
+	 * Handle the build completed event.
+	 */
 	@Override
     public void onCompleted(AbstractBuild build, @Nonnull TaskListener listener) {
 		log.info("Running Zeleo Plugin on Build Complete");
 		ZeleoNotifier notifier = getBuildUpdate(build);
 		Result result = build.getResult();
 		if(notifier != null && result != null) {
-			ZeleoUpdate event = new ZeleoUpdate(build.getProject().getDisplayName(), build.getDisplayName(), 
-					build.getBuildStatusUrl(), 
-					result.toString());
+			Calendar startCalendar = Calendar.getInstance();
+			startCalendar.setTimeInMillis(build.getStartTimeInMillis());
+			ZeleoUpdate event = new ZeleoUpdate(build.getDescription(), build.getDuration(), build.getEstimatedDuration(), 
+					build.getExternalizableId(), build.getFullDisplayName(), build.getId(), build.getSearchUrl(), 
+					build.getStartTimeInMillis(), build.getTimestampString(), build.getDisplayName(), 
+					build.getBuildStatusUrl(), result.toString(), DateUtils.getDay(startCalendar.get(Calendar.DAY_OF_WEEK)), 
+					startCalendar.get(Calendar.WEEK_OF_MONTH), startCalendar.get(Calendar.DAY_OF_MONTH), 
+					DateUtils.getMonth(startCalendar.get(Calendar.MONTH)), startCalendar.get(Calendar.YEAR), 
+					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR));
 			fireEvent(event);
 		}
 		
 	}
 	
+	/**
+	 * Grab the build update from the notification.
+	 * 
+	 * @param build The build object.
+	 * @return The Zeleo build notification.
+	 */
 	private ZeleoNotifier getBuildUpdate(AbstractBuild build) {
         for (Object update : build.getProject().getPublishersList().toMap().values()) {
             if (update instanceof ZeleoNotifier) {
@@ -92,18 +123,37 @@ public class BuildListener extends RunListener<AbstractBuild> {
         return null;
     }
 	
+	/**
+	 * Convert an object to a JSON string.
+	 * 
+	 * @param obj The object.
+	 * @return The json string.
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	private String toJSON(final Object obj) throws JsonGenerationException, JsonMappingException, IOException {
 		StringWriter writer = new StringWriter();
 		mapper.writeValue(writer, obj);
 		return writer.toString();
 	}
 	
+	/**
+	 * Fire the event to the Zeleo service.
+	 * 
+	 * @param event The object with event data.
+	 */
 	private void fireEvent(ZeleoUpdate event) {
 		try {
-			log.info(toJSON(event));
-			System.out.println(toJSON(event));
+			final String json = toJSON(event);
+			OkHttpClient client = SSLManager.trustZeleoSslClient(new OkHttpClient());
+	        RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, json);
+	        Request request = new Request.Builder().url(ZELEO_LAMBDA).post(body).build();
+	        Response response = client.newCall(request).execute();
+	        log.info("Event Posted to Zeleo: " + response.message()); 
 		} catch(Exception ex) {
 			log.error(ex.getMessage());
+			log.error(ex.getCause().getMessage());
 		}
 	}
 }
