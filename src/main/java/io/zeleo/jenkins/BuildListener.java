@@ -80,7 +80,7 @@ public class BuildListener extends RunListener<AbstractBuild> {
 					build.getBuildStatusUrl(), "START", DateUtils.getDay(startCalendar.get(Calendar.DAY_OF_WEEK)), 
 					startCalendar.get(Calendar.WEEK_OF_MONTH), startCalendar.get(Calendar.DAY_OF_MONTH), 
 					DateUtils.getMonth(startCalendar.get(Calendar.MONTH)), startCalendar.get(Calendar.YEAR), 
-					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR));
+					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR), "true");
 			fireEvent(event);
 		}
 	}
@@ -102,7 +102,7 @@ public class BuildListener extends RunListener<AbstractBuild> {
 					build.getBuildStatusUrl(), result.toString(), DateUtils.getDay(startCalendar.get(Calendar.DAY_OF_WEEK)), 
 					startCalendar.get(Calendar.WEEK_OF_MONTH), startCalendar.get(Calendar.DAY_OF_MONTH), 
 					DateUtils.getMonth(startCalendar.get(Calendar.MONTH)), startCalendar.get(Calendar.YEAR), 
-					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR));
+					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR), "true");
 			fireEvent(event);
 		}
 		
