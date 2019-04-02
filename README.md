@@ -10,7 +10,7 @@ Getting Jenkins ready to interact with Zeleo is as simple as installing a plugin
 2. Configure your build job (or create a new one) and select `Zeleo Build Event` from your _Post Build Events_ drop down.
 3. Once added, you will be able to select whether to trigger the event at the start of the build, when the build completes, or both.
 
-![Jenkins Plugin COnfiguration](https://raw.githubusercontent.com/Zeleo/zeleo-jenkins-plugin/master/.images/jenkins-plugin-config.png)
+![Jenkins Plugin Configuration](https://raw.githubusercontent.com/Zeleo/zeleo-jenkins-plugin/master/.images/jenkins-plugin-config.png)
 
 4. Then you need to add the email address of the Zeleo user you want to listen for these build events. Remember, Zeleo needs all events to be tied to a user, even if it's just system to system. This allows Zeleo to engage its social graph of your team if you so desire.
 5. That's it! Zeleo will now receive events from your build system from your Jenkins installation. There are some steps on the Zeleo side to get things working, but we'll do that in the next section.
