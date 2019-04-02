@@ -4,6 +4,9 @@
 This plugin allows you to react to build events using the [Zeleo](https://www.zeleo.io) workflow automation and rule engine. What can you do with this? Well- [Zeleo](https://www.zeleo.io) is intentionally a very open platform, so almost anything you want, but for example, you could assign tasks to developers on a buid failure to fix tests, trigger unit/integration tests depending on the day of the week to spread out testing, let you Slack channel know every detail of your build, etc. You could even use us to trigger deployments on other systems (like AWS or Azure).
 
 ## Jenkins Setup
+
+![Jenkins Plugin COnfiguration](https://raw.githubusercontent.com/Zeleo/zeleo-jenkins-plugin/master/.images/jenkins-plugin-config.png)
+
 1. Add this plugin to your Jenkins installation from the [Jenkins Plugin Site](https://plugins.jenkins.io/). 
 2. Configure yout build job (or create a new one) and select `Zeleo Build Event` from your _Post Build Events_ drop down.
 3. Once added, you will be able to select whether to trigger the event at the start of the build, or just when the build completes.
