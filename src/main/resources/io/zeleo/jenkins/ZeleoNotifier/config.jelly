@@ -3,4 +3,10 @@
   <f:entry title="Trigger Zeleo Event When Build Starts">
       <f:checkbox name="onStart" value="true" checked="${instance.onStart}"/>
   </f:entry>
+  <f:entry title="Trigger Zeleo Event When Build Finishes">
+      <f:checkbox name="onFinish" value="true" checked="${instance.onFinish}"/>
+  </f:entry>
+  <f:entry title="Build Owner Email">
+      <f:textbox name="email" value="${instance.email}" placeholder="Enter the email address for the Zeleo user."/>
+  </f:entry>
 </j:jelly>

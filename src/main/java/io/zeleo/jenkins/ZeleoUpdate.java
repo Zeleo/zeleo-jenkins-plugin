@@ -25,5 +25,5 @@ public class ZeleoUpdate {
     private Integer year;
     private Integer hourOfTheDay;
     private Integer weekOfTheYear;
-    private String listener = "true";
+    private String email;
 }

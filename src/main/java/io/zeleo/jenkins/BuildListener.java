@@ -65,13 +65,6 @@ public class BuildListener extends RunListener<AbstractBuild> {
 		ZeleoNotifier notifier = getBuildUpdate(build);
 		Calendar startCalendar = Calendar.getInstance();
 		startCalendar.setTimeInMillis(build.getStartTimeInMillis());
-		startCalendar.get(Calendar.DAY_OF_WEEK);
-		startCalendar.get(Calendar.WEEK_OF_MONTH);
-		startCalendar.get(Calendar.DAY_OF_MONTH);
-		startCalendar.get(Calendar.MONTH);
-		startCalendar.get(Calendar.YEAR);
-		startCalendar.get(Calendar.HOUR_OF_DAY);
-		startCalendar.get(Calendar.WEEK_OF_YEAR);
 		log.info("Zeleo Running at Build Start");
 		if(notifier != null && notifier.isOnStart()) {
 			ZeleoUpdate event = new ZeleoUpdate(build.getDescription(), build.getDuration(), build.getEstimatedDuration(), 
@@ -80,7 +73,7 @@ public class BuildListener extends RunListener<AbstractBuild> {
 					build.getBuildStatusUrl(), "START", DateUtils.getDay(startCalendar.get(Calendar.DAY_OF_WEEK)), 
 					startCalendar.get(Calendar.WEEK_OF_MONTH), startCalendar.get(Calendar.DAY_OF_MONTH), 
 					DateUtils.getMonth(startCalendar.get(Calendar.MONTH)), startCalendar.get(Calendar.YEAR), 
-					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR), "true");
+					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR), notifier.getEmail());
 			fireEvent(event);
 		}
 	}
@@ -93,7 +86,7 @@ public class BuildListener extends RunListener<AbstractBuild> {
 		log.info("Running Zeleo Plugin on Build Complete");
 		ZeleoNotifier notifier = getBuildUpdate(build);
 		Result result = build.getResult();
-		if(notifier != null && result != null) {
+		if(notifier != null && result != null && notifier.isOnFinish()) {
 			Calendar startCalendar = Calendar.getInstance();
 			startCalendar.setTimeInMillis(build.getStartTimeInMillis());
 			ZeleoUpdate event = new ZeleoUpdate(build.getDescription(), build.getDuration(), build.getEstimatedDuration(), 
@@ -102,7 +95,7 @@ public class BuildListener extends RunListener<AbstractBuild> {
 					build.getBuildStatusUrl(), result.toString(), DateUtils.getDay(startCalendar.get(Calendar.DAY_OF_WEEK)), 
 					startCalendar.get(Calendar.WEEK_OF_MONTH), startCalendar.get(Calendar.DAY_OF_MONTH), 
 					DateUtils.getMonth(startCalendar.get(Calendar.MONTH)), startCalendar.get(Calendar.YEAR), 
-					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR), "true");
+					startCalendar.get(Calendar.HOUR_OF_DAY), startCalendar.get(Calendar.WEEK_OF_YEAR), notifier.getEmail());
 			fireEvent(event);
 		}
 		

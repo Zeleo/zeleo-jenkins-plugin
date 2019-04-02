@@ -25,11 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 public class ZeleoNotifier extends Notifier {
 	
 	private boolean onStart;
+	private boolean onFinish;
+	private String email;
 	
 	@DataBoundConstructor
-    public ZeleoNotifier(boolean onStart) {
+    public ZeleoNotifier(boolean onStart, boolean onFinish, String email) {
 		super();
 		this.onStart = onStart;
+		this.onFinish = onFinish;
+		this.email = email;
 		log.info("Registering Zeleo Plugin");
 	}
 
